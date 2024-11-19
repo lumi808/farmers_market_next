@@ -30,8 +30,10 @@ model Buyer {
   paymentMethod String
   address       String
   phoneNumber String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  status    String @default("PENDING")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  rejectionReason String?
 }
 
 model Farmer {
@@ -44,6 +46,8 @@ model Farmer {
   farmAddress String
   farmSize    Int
   phoneNumber String
+  status    String @default("PENDING")
+  rejectionReason String?
   products    Product[]
   notifications Notification[]
   createdAt DateTime @default(now())
