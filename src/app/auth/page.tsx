@@ -52,98 +52,91 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-green-50">
+      <div className="text-center mb-8">
+        <h1 className="text-4xl font-bold text-green-800 mb-2">🌾 Farm Market</h1>
+        <p className="text-green-600">Connect with local farmers and buyers</p>
+      </div>
+
+      <div className="max-w-md w-full space-y-6 p-8 bg-white rounded-2xl shadow-lg border border-green-100">
         <div>
-          <h2 className="text-center text-3xl font-extrabold text-gray-900">
+          <h2 className="text-center text-3xl font-bold text-green-800">
             {isLogin ? 'Sign in to your account' : 'Register new account'}
           </h2>
         </div>
         
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl">
             {error}
           </div>
         )}
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm space-y-4">
-            <div>
-              <input
-                name="email"
-                type="email"
-                required
-                className="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Email address"
-                value={formData.email}
-                onChange={handleChange}
-              />
-            </div>
+        <form className="space-y-5" onSubmit={handleSubmit}>
+          <div className="space-y-4">
+            <input
+              name="email"
+              type="email"
+              required
+              className="appearance-none rounded-xl relative block w-full px-4 py-3 border border-green-200 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-300"
+              placeholder="Email address"
+              value={formData.email}
+              onChange={handleChange}
+            />
             
             {!isLogin && (
               <>
-                <div>
-                  <input
-                    name="firstName"
-                    type="text"
-                    required
-                    className="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                    placeholder="First Name"
-                    value={formData.firstName}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div>
-                  <input
-                    name="lastName"
-                    type="text"
-                    required
-                    className="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                    placeholder="Last Name"
-                    value={formData.lastName}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div>
-                  <input
-                    name="phoneNumber"
-                    type="text"
-                    required
-                    className="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                    placeholder="Phone Number"
-                    value={formData.phoneNumber}
-                    onChange={handleChange}
-                  />
-                </div>
+                <input
+                  name="firstName"
+                  type="text"
+                  required
+                  className="appearance-none rounded-xl relative block w-full px-4 py-3 border border-green-200 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-300"
+                  placeholder="First Name"
+                  value={formData.firstName}
+                  onChange={handleChange}
+                />
+                <input
+                  name="lastName"
+                  type="text"
+                  required
+                  className="appearance-none rounded-xl relative block w-full px-4 py-3 border border-green-200 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-300"
+                  placeholder="Last Name"
+                  value={formData.lastName}
+                  onChange={handleChange}
+                />
+                <input
+                  name="phoneNumber"
+                  type="text"
+                  required
+                  className="appearance-none rounded-xl relative block w-full px-4 py-3 border border-green-200 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-300"
+                  placeholder="Phone Number"
+                  value={formData.phoneNumber}
+                  onChange={handleChange}
+                />
               </>
             )}
 
-            <div>
-              <input
-                name="password"
-                type="password"
-                required
-                className="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Password"
-                value={formData.password}
-                onChange={handleChange}
-              />
-            </div>
+            <input
+              name="password"
+              type="password"
+              required
+              className="appearance-none rounded-xl relative block w-full px-4 py-3 border border-green-200 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-300"
+              placeholder="Password"
+              value={formData.password}
+              onChange={handleChange}
+            />
           </div>
 
-          <div>
-            <button
-              type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              {isLogin ? 'Sign in' : 'Register'}
-            </button>
-          </div>
+          <button
+            type="submit"
+            className="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-full text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-150"
+          >
+            {isLogin ? 'Sign in' : 'Register'}
+          </button>
         </form>
 
         <div className="text-center">
           <button
-            className="text-indigo-600 hover:text-indigo-500"
+            className="text-green-600 hover:text-green-700 font-medium transition-colors duration-150"
             onClick={() => setIsLogin(!isLogin)}
           >
             {isLogin ? 'Need to register?' : 'Already have an account?'}
