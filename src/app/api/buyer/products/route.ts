@@ -4,7 +4,8 @@ import { NextResponse } from 'next/server';
 const prisma = new PrismaClient();
 
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
+  const url = new URL(request.url);
+  const searchParams = url.searchParams;
 
   const name = searchParams.get('name') || undefined; 
   const category = searchParams.get('category') || undefined;
