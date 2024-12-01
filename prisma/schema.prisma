@@ -6,8 +6,8 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("POSTGRES_URL")
+  provider = "postgresql"
+  url      = env("POSTGRES_URL")
 }
 
 model Admin {
@@ -22,58 +22,124 @@ model Admin {
 }
 
 model Buyer {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  firstName String
-  lastName  String
-  paymentMethod String
-  address       String
-  phoneNumber String
-  status    String @default("PENDING")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id              String   @id @default(cuid())
+  email           String   @unique
+  password        String
+  firstName       String
+  lastName        String
+  paymentMethod   String
+  address         String
+  phoneNumber     String
+  status          String   @default("PENDING")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
   rejectionReason String?
+  cart            Cart?
+  cartId          String?
+  Order           Order[]
+  chats           Chat[]   @relation("BuyerChats")
 }
 
 model Farmer {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  firstName String
-  lastName  String
-  farmName  String
-  farmAddress String
-  farmSize    Int
-  phoneNumber String
-  status    String @default("PENDING")
+  id              String         @id @default(cuid())
+  email           String         @unique
+  password        String
+  firstName       String
+  lastName        String
+  farmName        String
+  farmAddress     String
+  farmSize        Int
+  phoneNumber     String
+  status          String         @default("PENDING")
   rejectionReason String?
-  products    Product[]
-  notifications Notification[]
+  products        Product[]
+  notifications   Notification[]
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  chats           Chat[]         @relation("FarmerChats")
+}
+
+model Product {
+  id           String      @id @default(cuid())
+  name         String
+  description  String
+  price        Float
+  quantity     Int
+  category     String
+  image        String
+  farmerId     String
+  farmer       Farmer      @relation(fields: [farmerId], references: [id])
+  isOutOfStock Boolean     @default(false)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  CartItem     CartItem[]
+  OrderItem    OrderItem[]
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  farmerId  String
+  farmer    Farmer   @relation(fields: [farmerId], references: [id])
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Cart {
+  id        String     @id @default(cuid())
+  buyerId   String     @unique
+  buyer     Buyer      @relation(fields: [buyerId], references: [id])
+  products  CartItem[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model CartItem {
+  id        String  @id @default(cuid())
+  cartId    String
+  productId String
+  quantity  Int
+  cart      Cart    @relation(fields: [cartId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
+}
+
+model Order {
+  id         String      @id @default(cuid())
+  buyerId    String
+  buyer      Buyer       @relation(fields: [buyerId], references: [id])
+  products   OrderItem[]
+  totalPrice Float
+  status     String      @default("PENDING")
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  productId String
+  quantity  Int
+  order     Order   @relation(fields: [orderId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
+}
+
+model Chat {
+  id        String   @id @default(cuid())
+  buyerId   String
+  farmerId  String
+  buyer     Buyer    @relation("BuyerChats", fields: [buyerId], references: [id])
+  farmer    Farmer   @relation("FarmerChats", fields: [farmerId], references: [id])
+  messages  Message[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-model Product {
-  id          String   @id @default(cuid())
-  name        String
-  description String
-  price       Float
-  quantity    Int
-  category    String 
-  image       String 
-  farmerId    String
-  farmer      Farmer   @relation(fields: [farmerId], references: [id])
-  isOutOfStock Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-model Notification {
-  id          String   @id @default(cuid())
-  farmerId    String
-  farmer      Farmer   @relation(fields: [farmerId], references: [id])
-  message     String
-  isRead      Boolean  @default(false)
-  createdAt   DateTime @default(now())
+model Message {
+  id         String   @id @default(cuid())
+  chatId     String
+  userId     String
+  senderType String
+  content    String
+  createdAt  DateTime @default(now())
+  chat       Chat     @relation(fields: [chatId], references: [id])
 }
