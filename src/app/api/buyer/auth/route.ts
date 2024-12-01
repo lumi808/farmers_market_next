@@ -63,6 +63,12 @@ export async function POST(request: Request) {
           },
         });
 
+        await prisma.cart.create({
+          data: {
+            buyerId: buyer.id,
+          },
+        });
+
         return NextResponse.json(
           {
             message: 'Buyer registered successfully',
