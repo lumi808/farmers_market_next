@@ -66,11 +66,6 @@ const WelcomePage = () => {
 							Administrate your system
 						</button>
 					</Link>
-					<Link href="/auth/user">
-						<button className="px-6 py-3 bg-green-600 text-white font-semibold rounded-full shadow hover:bg-green-700">
-							Become a member
-						</button>
-					</Link>
 				</div>
 			</div>
 		</div>
