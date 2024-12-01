@@ -3,7 +3,6 @@ import Link from "next/link";
 const WelcomePage = () => {
 	return (
 		<div className="flex flex-col items-center justify-center min-h-screen bg-cover bg-center relative">
-			{/* Overlay for readability */}
 			<div className="opacity-50 w-full h-full absolute">
 				<img
 					src={"/images/mainpage-bg-2.webp"}
