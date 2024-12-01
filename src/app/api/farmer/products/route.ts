@@ -4,6 +4,7 @@ import sharp from 'sharp';
 
 const prisma = new PrismaClient();
 
+/* eslint-disable @typescript-eslint/no-unused-vars */
 export async function POST(request: Request) {
   const formData = await request.formData();
   const farmerId = formData.get('farmerId')?.toString();
@@ -98,3 +99,4 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ error: 'Failed to delete product' }, { status: 500 });
   }
 }
+/* eslint-enable @typescript-eslint/no-unused-vars */

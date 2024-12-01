@@ -1,29 +1,29 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function AuthPage() {
-  const router = useRouter()
-  const [isLogin, setIsLogin] = useState(true)
+  const router = useRouter();
+  const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     firstName: '',
     lastName: '',
     phoneNumber: '',
-  })
-  const [error, setError] = useState('')
-  const [isForgotPassword, setIsForgotPassword] = useState(false)
+  });
+  const [error, setError] = useState('');
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [resetData, setResetData] = useState({
     email: '',
-    newPassword: ''
-  })
-  const [resetMessage, setResetMessage] = useState('')
+    newPassword: '',
+  });
+  const [resetMessage, setResetMessage] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
+    e.preventDefault();
+    setError('');
 
     try {
       const response = await fetch('/api/auth', {
@@ -35,33 +35,36 @@ export default function AuthPage() {
           ...formData,
           action: isLogin ? 'login' : 'register',
         }),
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error)
+        throw new Error(data.error);
       }
 
-      // Handle successful auth (e.g., save token, redirect)
-      router.push('/dashboard') // Redirect to dashboard or home page
-    } catch (err: any) {
-      setError(err.message)
+      router.push('/dashboard');
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('An unexpected error occurred.');
+      }
     }
-  }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value
-    }))
-  }
+      [e.target.name]: e.target.value,
+    }));
+  };
 
   const handleForgotPassword = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
-    setResetMessage('')
-    console.log(resetData);
+    e.preventDefault();
+    setError('');
+    setResetMessage('');
+
     try {
       const response = await fetch('/api/forgot-password', {
         method: 'POST',
@@ -70,24 +73,27 @@ export default function AuthPage() {
         },
         body: JSON.stringify({
           email: resetData.email,
-          newPassword: resetData.newPassword
+          newPassword: resetData.newPassword,
         }),
-      })
+      });
 
       if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.error || 'Failed to reset password')
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to reset password');
       }
 
-      const data = await response.json()
-      setResetMessage(data.message)
-      setResetData({ email: '', newPassword: '' })
-      // Optionally redirect to login after successful password reset
-      setTimeout(() => setIsForgotPassword(false), 2000)
-    } catch (err: any) {
-      setError(err.message)
+      const data = await response.json();
+      setResetMessage(data.message);
+      setResetData({ email: '', newPassword: '' });
+      setTimeout(() => setIsForgotPassword(false), 2000);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('An unexpected error occurred.');
+      }
     }
-  }
+  };
 
   if (isForgotPassword) {
     return (
