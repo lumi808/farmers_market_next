@@ -60,8 +60,13 @@ const WelcomePage = () => {
 					</div>
 				</div>
 
-				<div className="space-x-4">
+				<div className="flex gap-4 justify-center items-center">
 					<Link href="/auth">
+						<button className="px-6 py-3 bg-green-600 text-white font-semibold rounded-full shadow hover:bg-green-700">
+							Administrate your system
+						</button>
+					</Link>
+					<Link href="/auth/user">
 						<button className="px-6 py-3 bg-green-600 text-white font-semibold rounded-full shadow hover:bg-green-700">
 							Become a member
 						</button>
