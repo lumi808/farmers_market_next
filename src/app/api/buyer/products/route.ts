@@ -26,7 +26,12 @@ export async function GET(request: Request) {
         ],
       },
       include: {
-        farmer: { select: { farmAddress: true } },
+        farmer: { 
+          select: { 
+            firstName: true, 
+            lastName: true 
+          },
+        },
       },
       orderBy: 
         sort === 'price_asc'
