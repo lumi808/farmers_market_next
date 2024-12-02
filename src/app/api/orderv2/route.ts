@@ -17,6 +17,7 @@ export async function POST(request: Request) {
     // Validate each product
     const productDetails = [];
     let totalPrice = 0;
+    const farmersToNotify = new Set();
 
     for (const product of products) {
       const { productId, quantity } = product;
@@ -55,6 +56,8 @@ export async function POST(request: Request) {
         productId,
         quantity,
       });
+
+      farmersToNotify.add(productData.farmerId);
     }
 
     // Create the order
@@ -79,6 +82,15 @@ export async function POST(request: Request) {
       await prisma.product.update({
         where: { id: item.productId },
         data: { quantity: { decrement: item.quantity } },
+      });
+    }
+
+    for (const farmerId of farmersToNotify) {
+      await prisma.notification.create({
+        data: {
+          farmerId: farmerId as string,
+          message: `A new order has been placed including your products.`,
+        },
       });
     }
 
