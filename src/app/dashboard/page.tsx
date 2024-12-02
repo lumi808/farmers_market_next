@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 
 const API_BASE_URL = "https://farmers-market-next.vercel.app";
@@ -14,6 +14,26 @@ interface BaseUser {
 	status: "PENDING" | "ACTIVE" | "DISABLED";
 	createdAt: string;
 	rejectionReason?: string;
+}
+
+interface Order {
+	id: string;
+	buyerId: string;
+	buyer: Buyer; // Assuming a Buyer interface exists
+	products: OrderItem[]; // Assuming an OrderItem interface exists
+	totalPrice: number;
+	status: "PENDING" | "DELIVERED" | "APPROVED" | "COMING"; // You can add more statuses as needed
+	createdAt: Date;
+	updatedAt: Date;
+}
+
+interface OrderItem {
+	id: string;
+	orderId: string;
+	productId: string;
+	quantity: number;
+	order: Order;
+	product: Product;
 }
 
 interface Farmer extends BaseUser {
@@ -48,12 +68,13 @@ export interface Product {
 
 export default function DashboardPage() {
 	const [activeTab, setActiveTab] = useState<
-		"pending" | "active" | "disabled" | "all" | "all-products"
+		"pending" | "active" | "disabled" | "all" | "all-products" | "all-orders"
 	>("pending");
 	const [sortField, setSortField] = useState<keyof Product>("price");
 	const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 	const [users, setUsers] = useState<User[]>([]);
 	const [products, setProducts] = useState<Product[]>([]);
+	const [orders, setOrders] = useState<Order[]>([]);
 	const [rejectionReason, setRejectionReason] = useState("");
 	const [selectedUser, setSelectedUser] = useState<User | null>(null);
 	const [isModalOpen, setIsModalOpen] = useState(false);
@@ -100,6 +121,19 @@ export default function DashboardPage() {
 
 		fetchBuyerProducts();
 	}, [sortField, sortOrder]);
+
+	useEffect(() => {
+		const fetchOrders = async () => {
+			try {
+				const response = await axios.get(`${API_BASE_URL}/api/orders`);
+				setOrders(response.data);
+				console.log("orders", response.data);
+			} catch (error) {
+				console.error("Error fetching orders:", error);
+			}
+		};
+		fetchOrders();
+	}, []);
 
 	const handleApprove = async (userId: string) => {
 		try {
@@ -263,6 +297,38 @@ export default function DashboardPage() {
 		}
 	};
 
+	const filterDropdownRef = useRef<HTMLDivElement>(null);
+	const sortDropdownRef = useRef<HTMLDivElement>(null);
+	const sortOrderDropdownRef = useRef<HTMLDivElement>(null);
+
+	useEffect(() => {
+		const handleClickOutside = (event: MouseEvent) => {
+			if (
+				filterDropdownRef.current &&
+				!filterDropdownRef.current.contains(event.target as Node)
+			) {
+				setFilterDropdownOpen(false);
+			}
+			if (
+				sortDropdownRef.current &&
+				!sortDropdownRef.current.contains(event.target as Node)
+			) {
+				setSortDropdownOpen(false);
+			}
+			if (
+				sortOrderDropdownRef.current &&
+				!sortOrderDropdownRef.current.contains(event.target as Node)
+			) {
+				setSortOrderDropdownOpen(false);
+			}
+		};
+
+		document.addEventListener("mousedown", handleClickOutside);
+		return () => {
+			document.removeEventListener("mousedown", handleClickOutside);
+		};
+	}, []);
+
 	return (
 		<div className="min-h-screen bg-white">
 			{/* Header */}
@@ -303,6 +369,19 @@ export default function DashboardPage() {
 								} px-4 py-2 rounded-full border text-sm font-medium transition-colors duration-150 capitalize`}
 							>
 								All Products ({productCounts.allProducts})
+							</button>
+						))}
+						{["all-orders"].map((tab) => (
+							<button
+								key={tab}
+								onClick={() => setActiveTab(tab as typeof activeTab)}
+								className={`${
+									activeTab === tab
+										? "bg-green-100 text-green-800 border-green-200"
+										: "bg-white text-gray-600 hover:bg-green-50 hover:text-green-700"
+								} px-4 py-2 rounded-full border text-sm font-medium transition-colors duration-150 capitalize`}
+							>
+								All Orders ({orders ? orders.length : 0})
 							</button>
 						))}
 					</nav>
@@ -447,69 +526,84 @@ export default function DashboardPage() {
 								</div>
 
 								{filterDropdownOpen && (
-									<ul className="absolute z-10 mt-2 w-36 bg-green-100 rounded shadow-lg border border-green-500">
-										{[
-											"name",
-											"description",
-											"price",
-											"quantity",
-											"category",
-											"farmerName",
-											"createdAt",
-										].map((option) => (
-											<li
-												key={option}
-												className="px-3 py-2 text-sm hover:bg-green-200 text-black cursor-pointer"
-												onClick={() => {
-													setFilterField(option as keyof Product);
-													setFilterDropdownOpen(false);
-													setFilterValue("");
-												}}
-											>
-												{prettifyName(option)}
-											</li>
-										))}
-									</ul>
+									<div
+										className="absolute z-10 mt-2 w-36 bg-green-100 rounded shadow-lg border border-green-500"
+										ref={filterDropdownRef}
+									>
+										<ul>
+											{[
+												"name",
+												"description",
+												"price",
+												"quantity",
+												"category",
+												"farmerName",
+												"createdAt",
+											].map((option) => (
+												<li
+													key={option}
+													className="px-3 py-2 text-sm hover:bg-green-200 text-black cursor-pointer"
+													onClick={() => {
+														setFilterField(option as keyof Product);
+														setFilterDropdownOpen(false);
+														setFilterValue("");
+													}}
+												>
+													{prettifyName(option)}
+												</li>
+											))}
+										</ul>
+									</div>
 								)}
 								{sortDropdownOpen && (
-									<ul className="left-36 ml-2 absolute z-10 mt-2 w-36 bg-green-100 rounded shadow-lg border border-green-500">
-										{[
-											"name",
-											"description",
-											"price",
-											"quantity",
-											"category",
-											"farmerName",
-											"createdAt",
-										].map((option) => (
-											<li
-												key={option}
-												className="px-3 py-2 text-sm hover:bg-green-200 text-black cursor-pointer"
-												onClick={() => {
-													setSortField(option as keyof Product);
-													setSortDropdownOpen(false);
-												}}
-											>
-												{prettifyName(option)}
-											</li>
-										))}
-									</ul>
+									<div
+										className="left-36 ml-2 absolute z-10 mt-2 w-36 bg-green-100 rounded shadow-lg border border-green-500"
+										ref={sortDropdownRef}
+									>
+										<ul>
+											{[
+												"name",
+												"description",
+												"price",
+												"quantity",
+												"category",
+												"farmerName",
+												"createdAt",
+											].map((option) => (
+												<li
+													key={option}
+													className="px-3 py-2 text-sm hover:bg-green-200 text-black cursor-pointer"
+													onClick={() => {
+														setSortField(option as keyof Product);
+														setSortDropdownOpen(false);
+													}}
+												>
+													{prettifyName(option)}
+												</li>
+											))}
+										</ul>
+									</div>
 								)}
 								{sortOrderDropdownOpen && (
-									<ul className="left-72 ml-4 absolute z-10 mt-2 w-36 bg-green-100 rounded shadow-lg border border-green-500">
-										{["asc", "desc"].map((option) => (
-											<li
-												key={option}
-												className="px-3 py-2 text-sm hover:bg-green-200 text-black cursor-pointer"
-												onClick={() => {
-													setSortOrder(option as "asc" | "desc");
-													setSortOrderDropdownOpen(false);
-												}}
-											>
-												{prettifyName(option)}
-											</li>
-										))}
-									</ul>
+									<div
+										className="left-72 ml-4 absolute z-10 mt-2 w-36 bg-green-100 rounded shadow-lg border border-green-500"
+										ref={sortOrderDropdownRef}
+									>
+										<ul>
+											{["asc", "desc"].map((option) => (
+												<li
+													key={option}
+													className="px-3 py-2 text-sm hover:bg-green-200 text-black cursor-pointer"
+													onClick={() => {
+														setSortOrder(option as "asc" | "desc");
+														setSortOrderDropdownOpen(false);
+													}}
+												>
+													{prettifyName(option)}
+												</li>
+											))}
+										</ul>
+									</div>
 								)}
 							</div>
 							<input
@@ -601,6 +695,100 @@ export default function DashboardPage() {
 								{">"}
 							</button>
 						</div>
+					</div>
+				)}
+				{activeTab === "all-orders" && (
+					<div className="overflow-x-auto bg-white shadow-md rounded-lg p-4 border">
+						<table className="min-w-full table-auto">
+							<thead className="bg-green-100">
+								<tr>
+									<th className="px-4 py-2 text-left text-sm font-medium text-green-800">
+										Order ID
+									</th>
+									<th className="px-4 py-2 text-left text-sm font-medium text-green-800">
+										Buyer
+									</th>
+									<th className="px-4 py-2 text-left text-sm font-medium text-green-800">
+										Total Price
+									</th>
+									<th className="px-4 py-2 text-left text-sm font-medium text-green-800">
+										Status
+									</th>
+									<th className="px-4 py-2 text-left text-sm font-medium text-green-800">
+										Created At
+									</th>
+									<th className="px-4 py-2 text-left text-sm font-medium text-green-800">
+										Products
+									</th>
+								</tr>
+							</thead>
+							<tbody>
+								{orders.map((order) => (
+									<tr key={order.id} className="border-b hover:bg-green-50">
+										<td className="px-4 py-2 text-sm text-gray-800">
+											{order.id}
+										</td>
+										<td className="px-4 py-2 text-sm text-gray-800">
+											{order.buyer.firstName} {order.buyer.lastName} <br />
+											<span className="text-gray-600 text-xs">
+												{order.buyer.email}
+											</span>
+										</td>
+										<td className="px-4 py-2 text-sm text-gray-800">
+											${order.totalPrice.toFixed(2)}
+										</td>
+										<td className="px-4 py-2 text-sm text-gray-800">
+											<select
+												value={order.status}
+												onChange={async (e) => {
+													const newStatus = e.target.value as
+														| "PENDING"
+														| "DELIVERED"
+														| "APPROVED"
+														| "COMING";
+													try {
+														await axios.patch(`/api/orders/${order.id}`, {
+															status: newStatus,
+														});
+														setOrders((prev) =>
+															prev.map((o) =>
+																o.id === order.id
+																	? { ...o, status: newStatus }
+																	: o
+															)
+														);
+													} catch (error) {
+														console.error("Failed to update status:", error);
+														alert(
+															"Failed to update the status. Please try again."
+														);
+													}
+												}}
+												className="border border-green-300 bg-green-50 text-gray-800 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-green-200"
+											>
+												<option value="PENDING">PENDING</option>
+												<option value="DELIVERED">DELIVERED</option>
+												<option value="APPROVED">APPROVED</option>
+												<option value="COMING">COMING</option>
+											</select>
+										</td>
+										<td className="px-4 py-2 text-sm text-gray-800">
+											{new Date(order.createdAt).toLocaleDateString()}
+										</td>
+										<td className="px-4 py-2 text-sm text-gray-800">
+											<ul className="list-disc ml-4">
+												{order.products.map((item) => (
+													<li key={item.id}>
+														{item.product.name} (x{item.quantity}) - $
+														{item.product.price.toFixed(2)}
+													</li>
+												))}
+											</ul>
+										</td>
+									</tr>
+								))}
+							</tbody>
+						</table>
 					</div>
 				)}
 			</main>
