@@ -44,3 +44,37 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Failed to add product' }, { status: 500 });
   }
 }
+
+export async function GET(request: Request) {
+  try {
+    const url = new URL(request.url);
+    const farmerId = url.searchParams.get('farmerId');
+
+    if (!farmerId) {
+      return NextResponse.json(
+        { error: 'Farmer ID is required' },
+        { status: 400 }
+      );
+    }
+
+    const products = await prisma.product.findMany({
+      where: { farmerId },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    if (!products || products.length === 0) {
+      return NextResponse.json(
+        { message: 'No products found for this farmer' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(products, { status: 200 });
+  } catch (error) {
+    console.error('Error fetching products by farmerId:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch products' },
+      { status: 500 }
+    );
+  }
+}
